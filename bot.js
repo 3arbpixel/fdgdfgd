@@ -354,7 +354,7 @@ client.on('message', message => {
                 timestamp: new Date(),
                 footer: {
                   icon_url: client.user.avatarURL,
-                  text: "3bker Community ©"
+                  text: "ArtBot Community ©"
                 }
             }}
             )
@@ -661,7 +661,7 @@ message.channel.send(
 
 
    client.on('message', message => {
-     if (message.content === "#support") {
+     if (message.content === "-support") {
      let embed = new Discord.RichEmbed()
   .setAuthor(message.author.username)
   .setColor("#9B59B6")
