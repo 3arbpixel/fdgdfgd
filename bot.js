@@ -1843,23 +1843,23 @@ client.on('guildCreate', guild => {
          const embed = new Discord.RichEmbed()
      .setColor("RED")
      .setTitle('Click Here To Add Bot .!')
-     .setURL('https://discordapp.com/oauth2/authorize?client_id=435392018693488641&scope=bot&permissions=2146958591')
+     .setURL('https://discordapp.com/api/oauth2/authorize?client_id=622777290211721236&permissions=0&scope=bot')
   .setDescription(`**
-  New Server Add 3bker Community © ?
+  New Server Add  ArtBot support ?
 اسم السيرفر: ${guild.name}
 صاحب السيرفر: ${guild.owner}**`);
-client.channels.get("474127377245667328").sendEmbed(embed)
+client.channels.get("532325977921945603").sendEmbed(embed)
 });
 client.on('guildDelete', guild => {
          const embed = new Discord.RichEmbed()
      .setColor("GOLD")
      .setTitle('Click Here To Add Bot .!')
-     .setURL('https://discordapp.com/oauth2/authorize?client_id=435392018693488641&scope=bot&permissions=2146958591')
+     .setURL('https://discordapp.com/api/oauth2/authorize?client_id=622777290211721236&permissions=0&scope=bot')
   .setDescription(`**
-  Server Kicked 3bker Community © :cry:
+  Server Kicked ArtBot Support :cry:
 اسم السيرفر: ${guild.name}
 صاحب السيرفر: ${guild.owner}**`);
-client.channels.get("474127377245667328").sendEmbed(embed)
+client.channels.get("532325977921945603").sendEmbed(embed)
 });
 var type = [
     {
