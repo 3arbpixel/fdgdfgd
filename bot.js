@@ -227,9 +227,7 @@ if(credits[message.author.id].daily != moment().format('L')) {
    
         }
          
-   
- 
-});//LuXy
+})
 
 client.on('message', message => {
      if(!message.channel.guild) return;
