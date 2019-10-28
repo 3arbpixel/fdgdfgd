@@ -206,7 +206,6 @@ client.on("message", async msg => { // event message
 		}
 	}
 })
-}); 
 
 client.on('message', message => {
      if(!message.channel.guild) return;
