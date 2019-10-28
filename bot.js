@@ -150,83 +150,62 @@ G.setwelcomer <text channel name> لاختيار روم للترحيب
     }
 }); 
 
-const credits = JSON.parse(fs.readFileSync("./creditsCode.json", "utf8"));
-const coolDown = new Set();
+const sql = require('sqlite');
+const path = require('path');
+sql.open(path.join(__dirname, 'credits.sql')) // read sql file
+.then(() => { // then ?
+	console.log('Opened') // if the sql opened
+	sql.run(`CREATE TABLE IF NOT EXISTS creditSysteme (id VARCHAR(30), credits BIGINT, timeDaily BIGINT)`) // create new table if the table does'nt exosts
+})
+.catch(err => console.error(err)) // if the sql file does'nt exists
 
-client.on("message", message => {
- const args = message.content.split(' ');
-  const credits = require('./creditsCode.json');
-  const path = './creditsCode.json';
-  const mention = message.mentions.users.first() || client.users.get(args[1]) || message.author;
-  const mentionn = message.mentions.users.first() || client.users.get(args[1]);
-  const author = message.author.id;
-  const balance = args[2];
-  const daily = Math.floor(Math.random() * 350) + 10;
- 
-  if(!credits[author]) credits[author] = {credits: 50};
-  if(!credits[mention.id]) credits[mention.id] = {credits: 50};
-  fs.writeFile(path, JSON.stringify(credits, null, 5), function(err) {if(err) console.log(err)});
- 
- 
-  if(message.content.startsWith(prefix + "credit")) {
-  if(args[0] !== `${prefix}credit` && args[0] !== `${prefix}credits`) return;
- 
-  if(args[2]) {
-    if(isNaN(args[2]) || args[2] < 0) return message.channel.send(`:interrobang: **| ${message.author.username}, type the credit you need to transfer! **`);
-    if(mention.bot) return message.channel.send(`**:heavy_multiplication_x:| ${message.content.split(' ')[1]} لم يتم العثور على**`);
-    if(mention.id === message.author.id) return message.channel.send('**:heavy_multiplication_x:| لا يمكنك تحويل كردت لنفسك**');
-    if(credits[author].credits < balance) return message.channel.send(`** :thinking: | ${message.author.username}, Your balance is not enough for that!**`);
-    var one = Math.floor(Math.random() * 9) + 1;
-    var two = Math.floor(Math.random() * 9) + 1;
-    var three = Math.floor(Math.random() * 9) + 1;
-    var four = Math.floor(Math.random() * 9) + 1;
- 
-    var number = `${one}${two}${three}${four}`;
-   
-    message.channel.send(`**:heavy_dollar_sign:| \`${number}\`, أكتب الرقم للأستمرار**`).then(m => {
-      message.channel.awaitMessages(m => m.author.id === message.author.id, {max: 1, time: 10000}).then(c => {
-        if(c.first().content === number) {
-          m.delete();
-          message.channel.send(`**:moneybag: | ${message.author.username}, has transferred \`${balance}\` to ${mention}**`);
-          credits[author].credits += (-balance);
-          credits[mention.id].credits += (+balance);
-          fs.writeFile(path, JSON.stringify(credits, null, 5), function(err) {if(err) console.log(err)});
-        } else if(c.first().content !== number) {
-          m.delete();
-          message.channel.send(`** :money_with_wings: | تم الغاء الإرسال**`);
-        }
-      });
-    });
-  }
-  if(!args[2]) {
-    if(mention.bot) return message.channel.send(`:interrobang:**| ${message.author.username}, I can't find** ${message.content.split(' ')[1]}**!**`);
-    message.channel.send(`**${mention.username}, your :credit_card: balance is** \`$${credits[mention.id].credits}\`**.** `);
-  }
- 
-  }
-        if(args[0].toLowerCase() === `${prefix}daily`) {  
-     
-if(credits[message.author.id].daily != moment().format('L')) {
- 
-       credits[message.author.id].daily = moment().format('L');
-           
- 
-          let ammount = (300, 500, 100, 200, 120, 150, 350, 320,220,250);
-          credits[author].credits += ammount;
-       
-       
-          message.channel.send(`**:atm: | ${message.author.username}, you received your :yen: ${ammount} daily credits!**`);
-        fs.writeFile("./creditsCode.json", JSON.stringify(credits), function(e) {
-            if (e) throw e;
-        })
- 
-      }else{
-      message.channel.send(`:stopwatch: : **Please cool down  ${moment().endOf('day').fromNow()}**`);
- 
-      }
-   
-        }
-         
+client.on("message", async msg => { // event message
+	if(!msg.channel.guild) return; // channel guild
+	let men = msg.mentions.users.first() || msg.author; // the mention or the author
+	let prize =  msg.content.split(" ").slice(2).join(" ") // prize
+
+	if(msg.content.startsWith(prefix+"credits")) { // if the message content credits do 
+		if(!men || !men === undefined) return msg.channel.send("** :interrobang: | "+men.username+", I can't find "+men.username+"!**"); // undefind user
+		if(!prize) {
+		sql.get(`SELECT * FROM creditSysteme WHERE id = '${men.id}'`).then(res => { // select user from table
+			if(!res) sql.run(`INSERT INTO creditSysteme VALUES ('${men.id}', 0, 0)`) // if the user does'nt exisit in table
+			if(res) { // if user exsist
+					msg.channel.send("**"+men.username+" :credit_card: balance is ``"+res.credits+"$``.**") // reply
+			}
+		})
+		}else{ // else ?
+			if(isNaN(prize)) return msg.channel.send(" :interrobang: | "+msg.author.username+", type the credit you need to transfer!"); // is nan :)
+			if(parseFloat(prize) === NaN) return msg.channel.send(" :interrobang: | "+msg.author.username+", type the credit you need to transfer!"); // if nan :))
+			if(men === msg.author) return; // if the men = author
+			let authorRes = await sql.get(`SELECT * FROM creditSysteme WHERE id = '${msg.author.id}'`) // select from sql
+			let userRes = await sql.get(`SELECT * FROM creditSysteme WHERE id = '${men.id}'`) // select from sql
+			if(!authorRes) sql.run(`INSERT INTO creditSysteme VALUES ('${msg.author.id}', 0, 0)`) // if !user create new col 
+			if(!userRes) sql.run(`INSERT INTO creditSysteme VALUES ('${men.id}', 0, 0)`) // if !user create new col 
+			let authorCredits = authorRes.credits; // credits before transfer
+			let userCredits = userRes.credits; // credits before transfer
+			if(parseFloat(prize) > authorCredits) return msg.channel.send("** :thinking: | "+msg.author.username+", Your balance is not enough for that!**"); // if the balance hight then prize
+			sql.run(`UPDATE creditSysteme SET credits = ${authorCredits - parseInt(prize)} WHERE id = '${msg.author.id}'`); // uptade credits for the author
+			sql.run(`UPDATE creditSysteme SET credits = ${userCredits + parseInt(prize)} WHERE id = '${men.id}'`); // update credits for the mentions user
+			msg.channel.send("**:moneybag: | "+msg.author.username+", has transferred ``$"+prize+"`` to "+men.toString()+"**") // the message :)
+		}
+	} else if(msg.content.startsWith(prefix+"daily")) {  // if the message content daily do
+		let daily = 86400000; // 24h
+		let amount = Math.floor((Math.random() * 500) + 1) // Money
+    let res = await sql.get(`SELECT * FROM creditSysteme WHERE id = '${msg.author.id}'`) // select from sql
+		if(!res) sql.run(`INSERT INTO creditSysteme VALUES ('${men.id}', 0, 0)`) // if !user create new col 
+    let time = res.timeDaily; // select last daily
+    let credits = res.credits; // credits before daily
+    if(time != null && daily - (Date.now() - time) > 0) { // if already climed the daily in same day
+
+			let fr8 = ms(daily - (Date.now() - time)); // the remining time
+			msg.channel.send("**:stopwatch: | "+msg.author.username+", your daily :yen: credits refreshes in "+fr8.hours+" hours and "+fr8.seconds+" seconds. **") //reply
+
+		}else{ // if does'nt clim her daily in 24h
+			msg.channel.send("**:atm:  |  "+msg.author.username+", you received your :yen: "+amount+" daily credits!**"); // reply
+			sql.run(`UPDATE creditSysteme SET credits = ${credits + amount}, timeDaily = ${Date.now()} WHERE id = '${msg.author.id}'`); // add amount to the credits before daily
+		}
+	}
+})
 }); 
 
 client.on('message', message => {
