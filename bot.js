@@ -34,7 +34,7 @@ var ti={}
 ,attentions={};
 
 client.on('ready', function(){
-    var ms = 00000 ;
+    var ms = 10000 ;
     var setGame = [' ArtBot | -help '];
     var i = -1;
     var j = 0;
